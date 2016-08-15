@@ -54,14 +54,29 @@ public class MainActivity extends AppCompatActivity {
             public void handle(String param) {
                 promiseButton.setText(param);
             }
-        }).<String,String,String>next(Scheduler.main(), new PromiseExecuteHandler() {
+        }).<String,String,String>next(Scheduler.main(), new PromiseExecuteHandler<String,String,String>() {
             @Override
-            public void execute(Promise.State previousState, Promise.Deferred deferred) {
+            public void execute(Promise.State previousState, final Promise<String,String,String>.Deferred deferred) {
                 if(Promise.State.REJECTED == previousState){
                     Toast.makeText(MainActivity.this,"rejected",Toast.LENGTH_SHORT).show();
                 }else if(Promise.State.RESOLVED == previousState){
                     Toast.makeText(MainActivity.this,"resolved",Toast.LENGTH_SHORT).show();
                 }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for(int i=0;i<10;i++){
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            deferred.notify(i+"");
+                        }
+                        deferred.resolve("gao");
+
+                    }
+                }).start();
             }
         }).onResolved(Scheduler.main(), new PromiseHandler<String>() {
             @Override
