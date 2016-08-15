@@ -26,9 +26,9 @@ public class MainActivity extends AppCompatActivity {
     }
     @OnClick(R.id.promise)
     protected void test_promise(){
-        Promise.<String,String,String>newPromise(Scheduler.io(), new PromiseExecuteHandler() {
+        Promise.<String,String,String>newPromise(Scheduler.io(), new PromiseExecuteHandler<String,String,String>() {
             @Override
-            public void execute(Promise.State previousState, final Promise.Deferred deferred) {
+            public void execute(Promise.State previousState, final Promise<String,String,String>.Deferred deferred) {
                 for(int i=0;i<10;i++){
                     try {
                         Thread.sleep(500);
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             public void handle(String param) {
                 promiseButton.setText(param);
             }
-        }).<String,String,String>next(Scheduler.main(), new PromiseExecuteHandler<String,String,String>() {
+        }).next(Scheduler.main(), new PromiseExecuteHandler<String,String,String>() {
             @Override
             public void execute(Promise.State previousState, final Promise<String,String,String>.Deferred deferred) {
                 if(Promise.State.REJECTED == previousState){
