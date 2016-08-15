@@ -1,17 +1,18 @@
 package com.gaoweiqiao.promise.schduler;
 
-import com.gaoweiqiao.quiff.promise.Promise;
+
+import com.gaoweiqiao.promise.Promise;
 
 /**
  * Created by patrick on 16/8/11.
  */
-public class PromiseSchdulerHandler implements SchdulerHandler{
-    private static PromiseSchdulerHandler INSTANCE = null;
-    public static PromiseSchdulerHandler getInstance(){
+public class PromiseSchedulerHandler implements SchedulerHandler {
+    private static PromiseSchedulerHandler INSTANCE = null;
+    public static PromiseSchedulerHandler getInstance(){
         if(null == INSTANCE){
-            synchronized (PromiseSchdulerHandler.class){
+            synchronized (PromiseSchedulerHandler.class){
                 if(null == INSTANCE){
-                    INSTANCE = new PromiseSchdulerHandler();
+                    INSTANCE = new PromiseSchedulerHandler();
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.gaoweiqiao.promise.schduler;
 
-import com.gaoweiqiao.quiff.promise.Promise;
+
+import com.gaoweiqiao.promise.Promise;
 
 /**
  * Created by patrick on 16/8/14.

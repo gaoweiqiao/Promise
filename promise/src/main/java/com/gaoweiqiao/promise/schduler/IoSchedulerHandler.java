@@ -1,6 +1,5 @@
 package com.gaoweiqiao.promise.schduler;
 
-import com.gaoweiqiao.quiff.promise.PromiseHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,14 +7,14 @@ import java.util.concurrent.Executors;
 /**
  * Created by patrick on 16/8/11.
  */
-public class IoSchdulerHandler implements SchdulerHandler{
-    private static IoSchdulerHandler INSTANCE = null;
+public class IoSchedulerHandler implements SchedulerHandler {
+    private static IoSchedulerHandler INSTANCE = null;
     private static ExecutorService cachedThreadPool = null;
-    public static IoSchdulerHandler getInstance(){
+    public static IoSchedulerHandler getInstance(){
         if(null == INSTANCE){
-            synchronized (IoSchdulerHandler.class){
+            synchronized (IoSchedulerHandler.class){
                 if(null == INSTANCE){
-                    INSTANCE = new IoSchdulerHandler();
+                    INSTANCE = new IoSchedulerHandler();
                     cachedThreadPool = Executors.newCachedThreadPool();
                 }
             }
