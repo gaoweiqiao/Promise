@@ -67,9 +67,9 @@ public class Promise<T,E,N> {
     /**
      *
      **/
-    public static synchronized <T,E,N> Promise<T,E,N>  newPromise(SchedulerHandler schedulerHandler, PromiseExecuteHandler promiseExecuteHandler){
+    public static synchronized <T,E,N> Promise<T,E,N>  newPromise(SchedulerHandler schedulerHandler, PromiseExecuteHandler<T,E,N> promiseExecuteHandler){
         logThreadId("newPromise");
-        Promise<T,E,N> promise = new Promise<T,E,N> (schedulerHandler,(PromiseExecuteHandler<T,E,N>) promiseExecuteHandler);
+        Promise<T,E,N> promise = new Promise<T,E,N> (schedulerHandler, promiseExecuteHandler);
         promise.execute(State.NONE);
         return promise;
     }
