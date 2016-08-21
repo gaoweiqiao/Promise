@@ -31,7 +31,7 @@ public class Promise<T,E,N> {
     /**
      *  Promise 执行的函数
      * */
-    private PromiseExecuteHandler<T,E,N> promiseExecuteHandler;
+    private PromiseExecuteHandler promiseExecuteHandler;
     /**
      *  Promise 执行函数的调度器
      * */
@@ -67,7 +67,7 @@ public class Promise<T,E,N> {
     /**
      *
      **/
-    public static synchronized <T,E,N> Promise<T,E,N> newPromise(SchedulerHandler schedulerHandler, PromiseExecuteHandler<T,E,N> promiseExecuteHandler){
+    public static synchronized <T,E,N> Promise<T,E,N> newPromise(SchedulerHandler schedulerHandler, PromiseExecuteHandler<Void,Void,T,E,N> promiseExecuteHandler){
         logThreadId("newPromise");
         Promise<T,E,N> promise = new Promise<T,E,N> (schedulerHandler, promiseExecuteHandler);
         promise.execute(new PromiseResult<Void, Void>(null,null,State.NONE));
@@ -77,7 +77,7 @@ public class Promise<T,E,N> {
         this.schedulerHandler = schedulerHandler;
         this.promiseExecuteHandler = promiseExecuteHandler;
     }
-    private <A,B>void execute(final PromiseResult<A,B> result){
+    private <A, B>void execute(final PromiseResult<A,B> result){
         schedulerHandler.handle(new Runnable() {
             @Override
             public void run() {
@@ -145,7 +145,7 @@ public class Promise<T,E,N> {
 
         return this;
     }
-    public synchronized <A,B,C>  Promise<A,B,C> next(SchedulerHandler schedulerHandler, PromiseExecuteHandler<A,B,C> promiseExecuteHandler){
+    public synchronized <A,B,C>  Promise<A,B,C> next(SchedulerHandler schedulerHandler, PromiseExecuteHandler<T,E,A,B,C> promiseExecuteHandler){
         logThreadId("next");
         if(null == next){
             next = new Promise<A,B,C>(schedulerHandler, promiseExecuteHandler);
@@ -304,4 +304,5 @@ public class Promise<T,E,N> {
     protected static interface SettledListener{
         void listen(Promise promise);
     }
+
 }

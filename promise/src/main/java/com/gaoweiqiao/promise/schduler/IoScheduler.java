@@ -7,14 +7,14 @@ import java.util.concurrent.Executors;
 /**
  * Created by patrick on 16/8/11.
  */
-public class IoSchedulerHandler implements SchedulerHandler {
-    private static IoSchedulerHandler INSTANCE = null;
+public class IoScheduler implements Scheduler {
+    private static IoScheduler INSTANCE = null;
     private static ExecutorService cachedThreadPool = null;
-    public static IoSchedulerHandler getInstance(){
+    public static IoScheduler getInstance(){
         if(null == INSTANCE){
-            synchronized (IoSchedulerHandler.class){
+            synchronized (IoScheduler.class){
                 if(null == INSTANCE){
-                    INSTANCE = new IoSchedulerHandler();
+                    INSTANCE = new IoScheduler();
                     cachedThreadPool = Executors.newCachedThreadPool();
                 }
             }

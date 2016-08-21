@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.gaoweiqiao.promise.Promise;
 import com.gaoweiqiao.promise.PromiseHandler;
+import com.gaoweiqiao.promise.PromiseResult;
 import com.gaoweiqiao.promise.schduler.PromiseExecuteHandler;
 import com.gaoweiqiao.promise.schduler.Scheduler;
 
@@ -25,41 +26,45 @@ public class MainActivity extends AppCompatActivity {
     }
     @OnClick(R.id.promise)
     protected void test_promise(){
-        Promise.newPromise(Scheduler.io(), new PromiseExecuteHandler<Integer,String,String>() {
+        Promise.newPromise(Scheduler.io(), new PromiseExecuteHandler<Void,Void,String,Integer,String>() {
+
             @Override
-            public void execute(Promise.State previousState, final Promise<Integer,String,String>.Deferred deferred) {
-                for(int i=0;i<10;i++){
+            public  void execute(PromiseResult<Void,Void> promiseResult, Promise<String, Integer, String>.Deferred deferred) {
+                for (int i = 0; i < 10; i++) {
                     try {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    deferred.notify();
+                    deferred.notify("first notify"+i);
                 }
-                deferred.resolve(1);
+                deferred.resolve("first resolved");
             }
-        }).onResolved(Scheduler.main(), new PromiseHandler<Integer>() {
-            @Override
-            public void handle(Integer param) {
-                promiseButton.setText(param);
-            }
-        }).onRejected(Scheduler.main(), new PromiseHandler<String>() {
+
+        }).onResolved(Scheduler.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
-                promiseButton.setText(param);
+//                promiseButton.setText(param);
+            }
+        }).onRejected(Scheduler.main(), new PromiseHandler<Integer>() {
+            @Override
+            public void handle(Integer param) {
+//                promiseButton.setText(param);
             }
         }).onNotified(Scheduler.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
                 promiseButton.setText(param);
             }
-        }).next(Scheduler.main(), new PromiseExecuteHandler<String,String,String>() {
+        }).next(Scheduler.main(), new PromiseExecuteHandler<String,Integer, String,String,String>() {
+
             @Override
-            public void execute(Promise.State previousState, final Promise<String,String,String>.Deferred deferred) {
-                if(Promise.State.REJECTED == previousState){
-                    Toast.makeText(MainActivity.this,"rejected",Toast.LENGTH_SHORT).show();
-                }else if(Promise.State.RESOLVED == previousState){
-                    Toast.makeText(MainActivity.this,"resolved",Toast.LENGTH_SHORT).show();
+            public void execute(PromiseResult<String,Integer> promiseResult, final Promise<String, String, String>.Deferred deferred) {
+
+                if(Promise.State.REJECTED == promiseResult.getState()){
+                    Toast.makeText(MainActivity.this,promiseResult.getResolvedValue(),Toast.LENGTH_SHORT).show();
+                }else if(Promise.State.RESOLVED == promiseResult.getState()){
+                    Toast.makeText(MainActivity.this,promiseResult.getResolvedValue(),Toast.LENGTH_SHORT).show();
                 }
                 new Thread(new Runnable() {
                     @Override
@@ -70,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            deferred.notify(i+"");
+                            deferred.notify(i+" second notify ");
                         }
                         deferred.resolve("gao");
 

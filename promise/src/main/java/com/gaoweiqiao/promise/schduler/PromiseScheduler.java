@@ -6,13 +6,13 @@ import com.gaoweiqiao.promise.Promise;
 /**
  * Created by patrick on 16/8/11.
  */
-public class PromiseSchedulerHandler implements SchedulerHandler {
-    private static PromiseSchedulerHandler INSTANCE = null;
-    public static PromiseSchedulerHandler getInstance(){
+public class PromiseScheduler implements Scheduler {
+    private static PromiseScheduler INSTANCE = null;
+    public static PromiseScheduler getInstance(){
         if(null == INSTANCE){
-            synchronized (PromiseSchedulerHandler.class){
+            synchronized (PromiseScheduler.class){
                 if(null == INSTANCE){
-                    INSTANCE = new PromiseSchedulerHandler();
+                    INSTANCE = new PromiseScheduler();
                 }
             }
         }

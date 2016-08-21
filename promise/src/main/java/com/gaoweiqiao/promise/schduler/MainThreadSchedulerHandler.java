@@ -6,7 +6,7 @@ import android.os.Looper;
 /**
  * Created by patrick on 16/8/11.
  */
-public class MainThreadSchedulerHandler implements SchedulerHandler {
+public class MainThreadSchedulerHandler implements Scheduler {
     private static MainThreadSchedulerHandler INSTANCE = null;
     private static Handler mainHandler = null;
     public static MainThreadSchedulerHandler getInstance(){
