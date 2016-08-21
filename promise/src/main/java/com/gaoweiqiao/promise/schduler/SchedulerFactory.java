@@ -5,14 +5,14 @@ package com.gaoweiqiao.promise.schduler;
  */
 public class SchedulerFactory {
 
-    public static SchedulerHandler io(){
+    public static Scheduler io(){
         return IoScheduler.getInstance();
     }
-    public static SchedulerHandler main(){
-        return MainThreadSchedulerHandler.getInstance();
+    public static Scheduler main(){
+        return MainThreadScheduler.getInstance();
     }
-    public static SchedulerHandler promise(){
-        return PromiseSchedulerHandler.getInstance();
+    public static Scheduler promise(){
+        return PromiseScheduler.getInstance();
     }
 
 }

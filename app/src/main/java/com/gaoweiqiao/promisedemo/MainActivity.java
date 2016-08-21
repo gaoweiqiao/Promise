@@ -10,6 +10,7 @@ import com.gaoweiqiao.promise.PromiseHandler;
 import com.gaoweiqiao.promise.PromiseResult;
 import com.gaoweiqiao.promise.schduler.PromiseExecuteHandler;
 import com.gaoweiqiao.promise.schduler.Scheduler;
+import com.gaoweiqiao.promise.schduler.SchedulerFactory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     }
     @OnClick(R.id.promise)
     protected void test_promise(){
-        Promise.newPromise(Scheduler.io(), new PromiseExecuteHandler<Void,Void,String,Integer,String>() {
+        Promise.newPromise(SchedulerFactory.io(), new PromiseExecuteHandler<Void,Void,String,Integer,String>() {
 
             @Override
             public  void execute(PromiseResult<Void,Void> promiseResult, Promise<String, Integer, String>.Deferred deferred) {
@@ -41,22 +42,22 @@ public class MainActivity extends AppCompatActivity {
                 deferred.resolve("first resolved");
             }
 
-        }).onResolved(Scheduler.main(), new PromiseHandler<String>() {
+        }).onResolved(SchedulerFactory.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
 //                promiseButton.setText(param);
             }
-        }).onRejected(Scheduler.main(), new PromiseHandler<Integer>() {
+        }).onRejected(SchedulerFactory.main(), new PromiseHandler<Integer>() {
             @Override
             public void handle(Integer param) {
 //                promiseButton.setText(param);
             }
-        }).onNotified(Scheduler.main(), new PromiseHandler<String>() {
+        }).onNotified(SchedulerFactory.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
                 promiseButton.setText(param);
             }
-        }).next(Scheduler.main(), new PromiseExecuteHandler<String,Integer, String,String,String>() {
+        }).next(SchedulerFactory.main(), new PromiseExecuteHandler<String,Integer, String,String,String>() {
 
             @Override
             public void execute(PromiseResult<String,Integer> promiseResult, final Promise<String, String, String>.Deferred deferred) {
@@ -82,17 +83,17 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).start();
             }
-        }).onResolved(Scheduler.main(), new PromiseHandler<String>() {
+        }).onResolved(SchedulerFactory.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
                 promiseButton.setText(param);
             }
-        }).onNotified(Scheduler.main(), new PromiseHandler<String>() {
+        }).onNotified(SchedulerFactory.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
                 promiseButton.setText(param);
             }
-        }).onRejected(Scheduler.main(), new PromiseHandler<String>() {
+        }).onRejected(SchedulerFactory.main(), new PromiseHandler<String>() {
             @Override
             public void handle(String param) {
                 promiseButton.setText(param);

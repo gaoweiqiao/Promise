@@ -6,14 +6,14 @@ import android.os.Looper;
 /**
  * Created by patrick on 16/8/11.
  */
-public class MainThreadSchedulerHandler implements Scheduler {
-    private static MainThreadSchedulerHandler INSTANCE = null;
+public class MainThreadScheduler implements Scheduler {
+    private static MainThreadScheduler INSTANCE = null;
     private static Handler mainHandler = null;
-    public static MainThreadSchedulerHandler getInstance(){
+    public static MainThreadScheduler getInstance(){
         if(null == INSTANCE){
-            synchronized (MainThreadSchedulerHandler.class){
+            synchronized (MainThreadScheduler.class){
                 if(null == INSTANCE){
-                    INSTANCE = new MainThreadSchedulerHandler();
+                    INSTANCE = new MainThreadScheduler();
                     mainHandler = new Handler(Looper.getMainLooper());
                 }
             }
