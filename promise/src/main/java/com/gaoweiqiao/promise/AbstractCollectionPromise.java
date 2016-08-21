@@ -10,11 +10,15 @@ public abstract class AbstractCollectionPromise extends Promise implements Promi
     protected ConcurrentLinkedQueue<Promise> promiseCollection;
 
     protected AbstractCollectionPromise(Collection<Promise> promiseCollection) {
-        super();
-        this.promiseCollection = new ConcurrentLinkedQueue<Promise>(promiseCollection);
-        for(Promise promise : promiseCollection){
-            promise.listener = this;
-        }
+        getPromiseHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                AbstractCollectionPromise.this.promiseCollection = new ConcurrentLinkedQueue<Promise>( AbstractCollectionPromise.this.promiseCollection);
+                for(Promise promise : AbstractCollectionPromise.this.promiseCollection){
+                    promise.listener = AbstractCollectionPromise.this;
+                }
+            }
+        });
     }
 
     @Override

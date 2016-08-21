@@ -11,15 +11,21 @@ public class AllCollectionPromise extends AbstractCollectionPromise {
     }
 
     @Override
-    public void listen(Promise promise) {
-        if(State.REJECTED == promise.getState()){
-            deferred.reject("reject");
-        }else{
-            promiseCollection.remove(promise);
-            if(0 == promiseCollection.size()){
-                deferred.resolve("resolve");
+    public void listen(final Promise promise) {
+        getPromiseHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if(State.REJECTED == promise.getState()){
+                    deferred.reject("reject");
+                }else{
+                    promiseCollection.remove(promise);
+                    if(0 == promiseCollection.size()){
+                        deferred.resolve("resolve");
+                    }
+                }
             }
-        }
+        });
+
 
     }
 }

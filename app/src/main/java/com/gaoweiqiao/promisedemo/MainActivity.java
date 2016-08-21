@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    deferred.notify("notify i = "+i);
+                    deferred.notify();
                 }
                 deferred.resolve("success");
             }

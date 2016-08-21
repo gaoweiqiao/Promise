@@ -11,14 +11,20 @@ public class AnyCollectionPromise extends AbstractCollectionPromise {
     }
 
     @Override
-    public void listen(Promise promise) {
-        if(State.RESOLVED == promise.getState()){
-            deferred.resolve("resolve");
-        }else{
-            promiseCollection.remove(promise);
-            if(0 == promiseCollection.size()){
-                deferred.reject("reject");
+    public void listen(final Promise promise) {
+        getPromiseHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if(State.RESOLVED == promise.getState()){
+                    deferred.resolve("resolve");
+                }else{
+                    promiseCollection.remove(promise);
+                    if(0 == promiseCollection.size()){
+                        deferred.reject("reject");
+                    }
+                }
             }
-        }
+        });
+
     }
 }

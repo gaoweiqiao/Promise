@@ -145,14 +145,11 @@ public class Promise<T,E,N> {
 
         return this;
     }
-    public <A,B,C> Promise<A,B,C> next(SchedulerHandler schedulerHandler, PromiseExecuteHandler<A,B,C> promiseExecuteHandler){
-        synchronized (this){
-            logThreadId("next");
-            if(null == next){
-                next = new Promise<A,B,C>(schedulerHandler, promiseExecuteHandler);
-            }
+    public synchronized <A,B,C>  Promise<A,B,C> next(SchedulerHandler schedulerHandler, PromiseExecuteHandler<A,B,C> promiseExecuteHandler){
+        logThreadId("next");
+        if(null == next){
+            next = new Promise<A,B,C>(schedulerHandler, promiseExecuteHandler);
         }
-
         return next;
     }
     public State getState(){
