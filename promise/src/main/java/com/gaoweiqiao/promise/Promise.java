@@ -67,21 +67,21 @@ public class Promise<T,E,N> {
     /**
      *
      **/
-    public static synchronized <T,E,N> Promise<T,E,N>  newPromise(SchedulerHandler schedulerHandler, PromiseExecuteHandler<T,E,N> promiseExecuteHandler){
+    public static synchronized <T,E,N> Promise<T,E,N> newPromise(SchedulerHandler schedulerHandler, PromiseExecuteHandler<T,E,N> promiseExecuteHandler){
         logThreadId("newPromise");
         Promise<T,E,N> promise = new Promise<T,E,N> (schedulerHandler, promiseExecuteHandler);
-        promise.execute(State.NONE);
+        promise.execute(new PromiseResult<Void, Void>(null,null,State.NONE));
         return promise;
     }
     public <T,E,N>Promise(SchedulerHandler schedulerHandler, final PromiseExecuteHandler promiseExecuteHandler){
         this.schedulerHandler = schedulerHandler;
         this.promiseExecuteHandler = promiseExecuteHandler;
     }
-    private void execute(final State state){
+    private <A,B>void execute(final PromiseResult<A,B> result){
         schedulerHandler.handle(new Runnable() {
             @Override
             public void run() {
-                promiseExecuteHandler.execute(state,deferred);
+                promiseExecuteHandler.execute(result,deferred);
             }
         });
     }
@@ -160,7 +160,7 @@ public class Promise<T,E,N> {
         if(null == promiseHandlerThread){
             synchronized (Promise.class){
                 if(null == promiseHandlerThread){
-                    promiseHandlerThread = new HandlerThread("com.gaoweiqiao.quiff.promise");
+                    promiseHandlerThread = new HandlerThread("com.gaoweiqiao.promise");
                     promiseHandlerThread.start();
                     promiseHandler = new Handler(promiseHandlerThread.getLooper());
                 }
@@ -170,22 +170,21 @@ public class Promise<T,E,N> {
     }
     //
     private static void logThreadId(String methodName){
-        Log.d("quiff",methodName + Thread.currentThread().getId());
+        Log.d("promise",methodName + Thread.currentThread().getId());
     }
     //
     protected SettledListener listener;
     /**
      * Promise.all()
      * */
-    public static <A,B,C> Promise all(Collection<Promise> promiseCollection){
-        List<Promise> promiseList = new ArrayList<>(promiseCollection.size());
-        AbstractCollectionPromise collectionPromise = new AllCollectionPromise(promiseList);
-        for(Promise promise : promiseList){
+    public static <A,B,C> Promise<A,B,C> all(Collection<Promise> promiseCollection){
+        AbstractCollectionPromise<A,B,C> collectionPromise = new AllCollectionPromise<A,B,C>(promiseCollection);
+        for(Promise promise : promiseCollection){
             if(State.REJECTED == promise.getState()){
                 collectionPromise.deferred.reject("reject");
                 break;
             }else if(State.PENDING == promise.getState()){
-                promiseList.add(promise);
+                promiseCollection.add(promise);
             }
         }
         return collectionPromise;
@@ -231,7 +230,7 @@ public class Promise<T,E,N> {
                             resolvedValue = param;
                         }
                         if(null != next){
-                            next.execute(State.RESOLVED);
+                            next.execute(new PromiseResult<T,E>(param,null,State.RESOLVED));
                         }
                     }else {
                         throw new PromiseHasSettledException();
@@ -260,7 +259,7 @@ public class Promise<T,E,N> {
                             rejectedValue = param;
                         }
                         if(null != next){
-                            next.execute(State.REJECTED);
+                            next.execute(new PromiseResult<T,E>(null,param,State.REJECTED));
                         }
                     }else {
                         throw new PromiseHasSettledException();
@@ -305,8 +304,4 @@ public class Promise<T,E,N> {
     protected static interface SettledListener{
         void listen(Promise promise);
     }
-    /**
-     *  线程调度器
-     * */
-
 }

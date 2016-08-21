@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * Created by patrick on 16/8/9.
  */
-public class AnyCollectionPromise extends AbstractCollectionPromise {
+public class AnyCollectionPromise<A,B,C> extends AbstractCollectionPromise<A,B,C> {
     public AnyCollectionPromise(Collection<Promise> promiseCollection) {
         super(promiseCollection);
     }
