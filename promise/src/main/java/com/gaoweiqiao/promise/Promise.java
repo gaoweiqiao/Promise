@@ -23,15 +23,11 @@ public class Promise<T,E,N> {
     /**
      *  promise线程队列
      * */
-    private static Handler promiseHandler = null;
+    private static Handler promiseThreadHandler = null;
     /**
      *  下一个Promise
      * */
     private Promise next = null;
-    /**
-     *  Promise 执行的函数
-     * */
-    private PromiseExecuteHandler promiseExecuteHandler;
     /**
      *  Promise 执行函数的调度器
      * */
@@ -39,18 +35,7 @@ public class Promise<T,E,N> {
     /**
      *  成功的回调函数
      * */
-    private PromiseHandler<T> resolvePromiseHandler = null;
-    private Scheduler resolveScheduler = null;
-    /**
-     *  失败的回调函数
-     * */
-    private PromiseHandler<E> rejectPromiseHandler = null;
-    private Scheduler rejectScheduler = null;
-    /**
-     *  通知的回调函数
-     * */
-    private PromiseHandler<N> notifyPromiseHandler = null;
-    private Scheduler notifyScheduler= null;
+    private PromiseHandler<T,E,N> promiseHandler = null;
     /**
      *  Promise的状态
      */
@@ -61,7 +46,7 @@ public class Promise<T,E,N> {
     private N notifyValue = null;
     public final Deferred deferred = new Deferred();
 
-    protected Promise() {
+    protected <T,E,N>Promise() {
     }
 
     /**
@@ -69,86 +54,32 @@ public class Promise<T,E,N> {
      **/
     public static synchronized <T,E,N> Promise<T,E,N> newPromise(Scheduler scheduler, PromiseExecuteHandler<Void,Void,T,E,N> promiseExecuteHandler){
         logThreadId("newPromise");
-        Promise<T,E,N> promise = new Promise<T,E,N> (scheduler, promiseExecuteHandler);
-        promise.execute(new PromiseResult<Void, Void>(null,null,State.NONE));
+        Promise<T,E,N> promise = new Promise<T,E,N> ();
         return promise;
     }
-    public <T,E,N>Promise(Scheduler scheduler, final PromiseExecuteHandler promiseExecuteHandler){
-        this.scheduler = scheduler;
-        this.promiseExecuteHandler = promiseExecuteHandler;
-    }
-    private <A, B>void execute(final PromiseResult<A,B> result){
-        scheduler.handle(new Runnable() {
-            @Override
-            public void run() {
-                promiseExecuteHandler.execute(result,deferred);
-            }
-        });
-    }
-    //
-    public Promise<T,E,N> onResolved(final Scheduler scheduler, final PromiseHandler<T> successPromiseHandler){
+
+
+    /***/
+    public <A,B,C>Promise then(final PromiseHandler<T,E,N> handler){
         getPromiseHandler().post(new Runnable() {
             @Override
             public void run() {
                 logThreadId("onResolved");
                 if(State.RESOLVED == getState()){
-                    successPromiseHandler.handle(resolvedValue);
+                    promiseHandler.onResolved(resolvedValue);
+                }else if(State.REJECTED == getState()){
+                    promiseHandler.onRejected(rejectedValue);
                 }else if(State.PENDING == getState()){
-                    Promise.this.resolvePromiseHandler = successPromiseHandler;
-                    Promise.this.resolveScheduler = scheduler;
-                }
-            }
-        });
-        return this;
-    }
-    public Promise<T,E,N> onRejected(final Scheduler scheduler, final PromiseHandler<E> errorPromiseHandler){
-        getPromiseHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                logThreadId("onRejected");
-                if(State.REJECTED == getState()){
-                    scheduler.handle(new Runnable() {
-                        @Override
-                        public void run() {
-                        errorPromiseHandler.handle(rejectedValue);
-                        }
-                    });
-
-                }else if(State.PENDING == getState()){
-                    Promise.this.rejectPromiseHandler = errorPromiseHandler;
-                    Promise.this.rejectScheduler = scheduler;
-                }
-            }
-        });
-
-        return this;
-    }
-    public Promise<T,E,N> onNotified(final Scheduler scheduler, final PromiseHandler<N> notifyPromiseHandler){
-        getPromiseHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                logThreadId("onNotified");
-                if(State.PENDING == getState()){
-                    Promise.this.notifyPromiseHandler = notifyPromiseHandler;
-                    Promise.this.notifyScheduler = scheduler;
+                    Promise.this.promiseHandler = handler;
                     if(null != notifyValue){
-                        scheduler.handle(new Runnable() {
-                            @Override
-                            public void run() {
-                                notifyPromiseHandler.handle(notifyValue);
-                            }
-                        });
+                        promiseHandler.onNotified(notifyValue);
                     }
                 }
             }
         });
-
-        return this;
-    }
-    public synchronized <A,B,C>  Promise<A,B,C> next(Scheduler schedulerHandler, PromiseExecuteHandler<T,E,A,B,C> promiseExecuteHandler){
         logThreadId("next");
         if(null == next){
-            next = new Promise<A,B,C>(schedulerHandler, promiseExecuteHandler);
+            next = new Promise<A,B,C>();
         }
         return next;
     }
@@ -162,11 +93,11 @@ public class Promise<T,E,N> {
                 if(null == promiseHandlerThread){
                     promiseHandlerThread = new HandlerThread("com.gaoweiqiao.promise");
                     promiseHandlerThread.start();
-                    promiseHandler = new Handler(promiseHandlerThread.getLooper());
+                    promiseThreadHandler = new Handler(promiseHandlerThread.getLooper());
                 }
             }
         }
-        return promiseHandler;
+        return promiseThreadHandler;
     }
     //
     private static void logThreadId(String methodName){
@@ -219,18 +150,10 @@ public class Promise<T,E,N> {
                         if(null != listener){
                             listener.listen(Promise.this);
                         }
-                        if(null != resolvePromiseHandler){
-                            rejectScheduler.handle(new Runnable() {
-                                @Override
-                                public void run() {
-                                    resolvePromiseHandler.handle(param);
-                                }
-                            });
+                        if(null != promiseHandler){
+                            promiseHandler.onResolved(param);
                         }else{
                             resolvedValue = param;
-                        }
-                        if(null != next){
-                            next.execute(new PromiseResult<T,E>(param,null,State.RESOLVED));
                         }
                     }else {
                         throw new PromiseHasSettledException();
@@ -248,19 +171,12 @@ public class Promise<T,E,N> {
                         if(null != listener){
                             listener.listen(Promise.this);
                         }
-                        if(null != rejectPromiseHandler){
-                            rejectScheduler.handle(new Runnable() {
-                                @Override
-                                public void run() {
-                                    rejectPromiseHandler.handle(param);
-                                }
-                            });
+                        if(null != promiseHandler){
+                            promiseHandler.onRejected(param);
                         }else {
                             rejectedValue = param;
                         }
-                        if(null != next){
-                            next.execute(new PromiseResult<T,E>(null,param,State.REJECTED));
-                        }
+
                     }else {
                         throw new PromiseHasSettledException();
                     }
@@ -273,13 +189,8 @@ public class Promise<T,E,N> {
                 public void run() {
                     logThreadId("notify");
                     if(State.PENDING == getState()){
-                        if(null != notifyPromiseHandler){
-                            notifyScheduler.handle(new Runnable() {
-                                @Override
-                                public void run() {
-                                notifyPromiseHandler.handle(param);
-                                }
-                            });
+                        if(null != promiseHandler){
+                            promiseHandler.onNotified(param);
                         }
                         notifyValue = param;
                     }else {
