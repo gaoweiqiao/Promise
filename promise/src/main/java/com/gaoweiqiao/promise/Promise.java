@@ -5,7 +5,6 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import com.gaoweiqiao.promise.exception.PromiseHasSettledException;
-import com.gaoweiqiao.promise.schduler.PromiseExecuteHandler;
 import com.gaoweiqiao.promise.schduler.Scheduler;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class Promise<T,E,N> {
     /**
      *
      **/
-    public static synchronized <T,E,N> Promise<T,E,N> newPromise(Scheduler scheduler, PromiseExecuteHandler<Void,Void,T,E,N> promiseExecuteHandler){
+    public static synchronized <T,E,N> Promise<T,E,N> newPromise(){
         logThreadId("newPromise");
         Promise<T,E,N> promise = new Promise<T,E,N> ();
         return promise;
@@ -60,34 +59,92 @@ public class Promise<T,E,N> {
 
 
     /***/
-    public <A,B,C>Promise then(final PromiseHandler<T,E,N> handler){
-        getPromiseHandler().post(new Runnable() {
+    public <A,B,C>Promise<A,B,C> then(final PromiseHandler<T,E,N> handler){
+        getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
                 logThreadId("onResolved");
                 if(State.RESOLVED == getState()){
-                    promiseHandler.onResolved(resolvedValue);
-                }else if(State.REJECTED == getState()){
-                    promiseHandler.onRejected(rejectedValue);
-                }else if(State.PENDING == getState()){
-                    Promise.this.promiseHandler = handler;
-                    if(null != notifyValue){
-                        promiseHandler.onNotified(notifyValue);
+
+                    if(resolvedValue instanceof Promise){
+                        ((Promise) resolvedValue).promiseHandler = new PromiseHandler() {
+                            @Override
+                            public void onResolved(Object param) {
+                                if(null != next){
+                                    next.deferred.resolve(param);
+                                }
+                            }
+
+                            @Override
+                            public void onRejected(Object param) {
+                                if(null != next){
+                                    next.deferred.reject(param);
+                                }
+                            }
+
+                            @Override
+                            public void onNotified(Object param) {
+                                if(null != next){
+                                    next.deferred.notify(param);
+                                }
+                            }
+                        };
+                    }else{
+                        promiseHandler.onResolved(resolvedValue);
                     }
+                }else if(State.REJECTED == getState()){
+                    if(resolvedValue instanceof Promise){
+                        ((Promise) resolvedValue).promiseHandler = new PromiseHandler() {
+                            @Override
+                            public void onResolved(Object param) {
+                                if(null != next){
+                                    next.deferred.resolve(param);
+                                }
+                            }
+
+                            @Override
+                            public void onRejected(Object param) {
+                                if(null != next){
+                                    next.deferred.reject(param);
+                                }
+                            }
+
+                            @Override
+                            public void onNotified(Object param) {
+                                if(null != next){
+                                    next.deferred.notify(param);
+                                }
+                            }
+                        };
+                    }else{
+                        promiseHandler.onRejected(rejectedValue);
+                    }
+                }else if(State.PENDING == getState()){
+                    if(notifyValue instanceof Promise){
+
+                    }else{
+                        Promise.this.promiseHandler = handler;
+                        if(null != notifyValue){
+                            promiseHandler.onNotified(notifyValue);
+                        }
+                    }
+
                 }
             }
         });
         logThreadId("next");
-        if(null == next){
-            next = new Promise<A,B,C>();
+        synchronized(this){
+            if(null == next){
+                next = new Promise<A,B,C>();
+            }
+            return next;
         }
-        return next;
     }
     public State getState(){
         return state;
     }
     //
-    public static Handler getPromiseHandler(){
+    public static Handler getPromiseThreadHandler(){
         if(null == promiseHandlerThread){
             synchronized (Promise.class){
                 if(null == promiseHandlerThread){
@@ -141,7 +198,7 @@ public class Promise<T,E,N> {
      * */
     public class Deferred{
         public void resolve(final T param){
-            getPromiseHandler().post(new Runnable() {
+            getPromiseThreadHandler().post(new Runnable() {
                 @Override
                 public void run() {
                     logThreadId("resolve");
@@ -162,7 +219,7 @@ public class Promise<T,E,N> {
             });
         }
         public void reject(final E param){
-            getPromiseHandler().post(new Runnable() {
+            getPromiseThreadHandler().post(new Runnable() {
                 @Override
                 public void run() {
                     logThreadId("reject");
@@ -184,7 +241,7 @@ public class Promise<T,E,N> {
             });
         }
         public void notify(final N param){
-            getPromiseHandler().post(new Runnable() {
+            getPromiseThreadHandler().post(new Runnable() {
                 @Override
                 public void run() {
                     logThreadId("notify");
