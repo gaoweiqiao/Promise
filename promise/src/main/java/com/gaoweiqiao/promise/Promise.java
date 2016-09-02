@@ -60,6 +60,10 @@ public class Promise<T,E,N> {
         return resolvedValue;
     }
 
+    public Promise getNext() {
+        return next;
+    }
+
     /**
      *
      **/

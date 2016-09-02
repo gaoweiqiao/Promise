@@ -7,6 +7,9 @@ public abstract class PromiseHandler<T,E,N> {
     public abstract void onResolved(T param);
     public abstract void onRejected(E param);
     public abstract void onNotified(N param);
+    public final <A>void next(Promise promise,A param){
+        promise.getNext().deferred.resolve(param);
+    }
     public final void handle(Promise<T,E,N> promise){
         if(Promise.State.RESOLVED == promise.getState()){
             T resolvedValue = promise.getResolvedValue();
