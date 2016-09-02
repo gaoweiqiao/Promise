@@ -48,6 +48,18 @@ public class Promise<T,E,N> {
     protected <T,E,N>Promise() {
     }
 
+    public E getRejectedValue() {
+        return rejectedValue;
+    }
+
+    public N getNotifyValue() {
+        return notifyValue;
+    }
+
+    public T getResolvedValue() {
+        return resolvedValue;
+    }
+
     /**
      *
      **/
@@ -63,72 +75,13 @@ public class Promise<T,E,N> {
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
-                logThreadId("onResolved");
+                promiseHandler = handler;
                 if(State.RESOLVED == getState()){
-
-                    if(resolvedValue instanceof Promise){
-                        ((Promise) resolvedValue).promiseHandler = new PromiseHandler() {
-                            @Override
-                            public void onResolved(Object param) {
-                                if(null != next){
-                                    next.deferred.resolve(param);
-                                }
-                            }
-
-                            @Override
-                            public void onRejected(Object param) {
-                                if(null != next){
-                                    next.deferred.reject(param);
-                                }
-                            }
-
-                            @Override
-                            public void onNotified(Object param) {
-                                if(null != next){
-                                    next.deferred.notify(param);
-                                }
-                            }
-                        };
-                    }else{
-                        promiseHandler.onResolved(resolvedValue);
-                    }
+                    promiseHandler.handle(Promise.this);
                 }else if(State.REJECTED == getState()){
-                    if(resolvedValue instanceof Promise){
-                        ((Promise) resolvedValue).promiseHandler = new PromiseHandler() {
-                            @Override
-                            public void onResolved(Object param) {
-                                if(null != next){
-                                    next.deferred.resolve(param);
-                                }
-                            }
-
-                            @Override
-                            public void onRejected(Object param) {
-                                if(null != next){
-                                    next.deferred.reject(param);
-                                }
-                            }
-
-                            @Override
-                            public void onNotified(Object param) {
-                                if(null != next){
-                                    next.deferred.notify(param);
-                                }
-                            }
-                        };
-                    }else{
-                        promiseHandler.onRejected(rejectedValue);
-                    }
+                    promiseHandler.handle(Promise.this);
                 }else if(State.PENDING == getState()){
-                    if(notifyValue instanceof Promise){
-
-                    }else{
-                        Promise.this.promiseHandler = handler;
-                        if(null != notifyValue){
-                            promiseHandler.onNotified(notifyValue);
-                        }
-                    }
-
+                    promiseHandler.handle(Promise.this);
                 }
             }
         });
@@ -204,13 +157,12 @@ public class Promise<T,E,N> {
                     logThreadId("resolve");
                     if(State.PENDING == getState()){
                         state = State.RESOLVED;
+                        Promise.this.resolvedValue = param;
                         if(null != listener){
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.onResolved(param);
-                        }else{
-                            resolvedValue = param;
+                            promiseHandler.handle(Promise.this);
                         }
                     }else {
                         throw new PromiseHasSettledException();
@@ -225,13 +177,12 @@ public class Promise<T,E,N> {
                     logThreadId("reject");
                     if(State.PENDING == getState()){
                         state = State.REJECTED;
+                        Promise.this.rejectedValue = param;
                         if(null != listener){
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.onRejected(param);
-                        }else {
-                            rejectedValue = param;
+                            promiseHandler.handle(Promise.this);
                         }
 
                     }else {
@@ -246,10 +197,10 @@ public class Promise<T,E,N> {
                 public void run() {
                     logThreadId("notify");
                     if(State.PENDING == getState()){
-                        if(null != promiseHandler){
-                            promiseHandler.onNotified(param);
-                        }
                         notifyValue = param;
+                        if(null != promiseHandler){
+                            promiseHandler.handle(Promise.this);
+                        }
                     }else {
                         throw new PromiseHasSettledException();
                     }
