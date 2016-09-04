@@ -17,17 +17,17 @@ public abstract class PromiseHandler<T,E,N> {
                 ((Promise) resolvedValue).then(new PromiseHandler() {
                     @Override
                     public void onResolved(Object param) {
-                        this.onResolved(param);
+                        PromiseHandler.this.onResolved((T) param);
                     }
 
                     @Override
                     public void onRejected(Object param) {
-                        this.onRejected(param);
+                        PromiseHandler.this.onRejected((E) param);
                     }
 
                     @Override
                     public void onNotified(Object param) {
-                        this.onNotified(param);
+                        PromiseHandler.this.onNotified((N) param);
                     }
                 });
             }else {
