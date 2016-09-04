@@ -80,13 +80,7 @@ public class Promise<T,E,N> {
             @Override
             public void run() {
                 promiseHandler = handler;
-                if(State.RESOLVED == getState()){
-                    promiseHandler.handle(Promise.this);
-                }else if(State.REJECTED == getState()){
-                    promiseHandler.handle(Promise.this);
-                }else if(State.PENDING == getState()){
-                    promiseHandler.handle(Promise.this);
-                }
+                promiseHandler.handle(Promise.this);
             }
         });
         logThreadId("next");
@@ -166,7 +160,7 @@ public class Promise<T,E,N> {
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.handle(Promise.this);
+                            promiseHandler.onResolved(param);
                         }
                     }else {
                         throw new PromiseHasSettledException();
@@ -186,7 +180,7 @@ public class Promise<T,E,N> {
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.handle(Promise.this);
+                            promiseHandler.reject(param);
                         }
 
                     }else {
@@ -203,7 +197,7 @@ public class Promise<T,E,N> {
                     if(State.PENDING == getState()){
                         notifyValue = param;
                         if(null != promiseHandler){
-                            promiseHandler.handle(Promise.this);
+                            promiseHandler.onNotified(param);
                         }
                     }else {
                         throw new PromiseHasSettledException();
