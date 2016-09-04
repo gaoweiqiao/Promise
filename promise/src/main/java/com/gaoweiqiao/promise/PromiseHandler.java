@@ -3,7 +3,7 @@ package com.gaoweiqiao.promise;
 /**
  * Created by patrick on 16/8/7.
  */
-public abstract class PromiseHandler<T,E,N> {
+public abstract class PromiseHandler<T,E,N,A,B,C> {
     public abstract void onResolved(T param);
     public abstract void onRejected(E param);
     public abstract void onNotified(N param);

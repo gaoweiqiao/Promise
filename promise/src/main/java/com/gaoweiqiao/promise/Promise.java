@@ -34,7 +34,7 @@ public class Promise<T,E,N> {
     /**
      *  成功的回调函数
      * */
-    private PromiseHandler<T,E,N> promiseHandler = null;
+    private PromiseHandler<T,E,N,?,?,?> promiseHandler = null;
     /**
      *  Promise的状态
      */
@@ -75,7 +75,7 @@ public class Promise<T,E,N> {
 
 
     /***/
-    public <A,B,C>Promise<A,B,C> then(final PromiseHandler<T,E,N> handler){
+    public <A,B,C>Promise<A,B,C> then(final PromiseHandler<T,E,N,A,B,C> handler){
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -180,7 +180,7 @@ public class Promise<T,E,N> {
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.reject(param);
+                            promiseHandler.onRejected(param);
                         }
 
                     }else {

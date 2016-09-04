@@ -29,9 +29,9 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.promise)
     protected void test_promise(){
        getPromise("gao")
-               .<Integer,String,String>then(new PromiseHandler<String, String, String>() {
+               .then(new PromiseHandler<String, String, String,Integer,String,String>() {
                    @Override
-                   public void onResolved(String param) {
+                   public void onResolved(final String param) {
                        Log.d("gao","resolve param is "+param);
 
                        new Thread(new Runnable() {
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                        Log.d("gao","notify param is "+param);
                    }
                })
-               .then(new PromiseHandler<Integer, String, String>() {
+               .then(new PromiseHandler<Integer, String, String,Void,Void,Void>() {
                    @Override
                    public void onResolved(Integer param) {
                        Log.d("gao","resolve param is "+param);
