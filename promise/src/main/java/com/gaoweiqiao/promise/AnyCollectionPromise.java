@@ -12,7 +12,7 @@ public class AnyCollectionPromise<A,B,C> extends AbstractCollectionPromise<A,B,C
 
     @Override
     public void listen(final Promise promise) {
-        getPromiseHandler().post(new Runnable() {
+        getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
                 if(State.RESOLVED == promise.getState()){

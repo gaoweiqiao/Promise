@@ -10,7 +10,7 @@ public abstract class AbstractCollectionPromise<A,B,C> extends Promise implement
     protected ConcurrentLinkedQueue<Promise> promiseCollection;
 
     protected AbstractCollectionPromise(Collection<Promise> promiseCollection) {
-        getPromiseHandler().post(new Runnable() {
+        getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
                 AbstractCollectionPromise.this.promiseCollection = new ConcurrentLinkedQueue<Promise>( AbstractCollectionPromise.this.promiseCollection);
