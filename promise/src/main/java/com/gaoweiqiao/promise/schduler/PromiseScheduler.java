@@ -21,6 +21,6 @@ public class PromiseScheduler implements Scheduler {
 
     @Override
     public void handle(Runnable runnable) {
-        Promise.getPromiseHandler().post(runnable);
+        Promise.getPromiseThreadHandler().post(runnable);
     }
 }

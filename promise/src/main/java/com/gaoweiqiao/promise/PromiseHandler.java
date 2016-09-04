@@ -8,13 +8,13 @@ public abstract class PromiseHandler<T,E,N> {
     public abstract void onRejected(E param);
     public abstract void onNotified(N param);
     private Promise<T,E,N> promise;
-    public final <A>void resolve(A param){
+    public final void resolve(A param){
         promise.getNext().deferred.resolve(param);
     }
-    public final <B>void reject(B param){
+    public final void reject(B param){
         promise.getNext().deferred.reject(param);
     }
-    public final <C>void notify(C param){
+    public final void notify(C param){
         promise.getNext().deferred.notify(param);
     }
     public final void handle(Promise<T,E,N> promise){
