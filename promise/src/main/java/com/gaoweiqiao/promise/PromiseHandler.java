@@ -1,5 +1,8 @@
 package com.gaoweiqiao.promise;
 
+import com.gaoweiqiao.promise.schduler.Scheduler;
+import com.gaoweiqiao.promise.schduler.SchedulerFactory;
+
 /**
  * Created by patrick on 16/8/7.
  */
@@ -45,6 +48,10 @@ public abstract class PromiseHandler<T,E,N,A,B,C> {
             }
         });
     }
+    public Scheduler getHandleScheduler(short promiseState){
+        return SchedulerFactory.promise();
+    }
+
     public final void handle(Promise<T,E,N> promise){
         this.promise = promise;
         if(Promise.RESOLVED == promise.getState()){

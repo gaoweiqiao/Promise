@@ -115,39 +115,49 @@ public class Promise<T,E,N> {
     }
     //
     private static void logThreadId(String methodName){
-        Log.d("promise",methodName + Thread.currentThread().getId());
+        Log.d("promise @",methodName + Thread.currentThread().getId());
     }
     //
     protected SettledListener listener;
     /**
      * Promise.all()
      * */
-    public static <A,B,C> Promise<A,B,C> all(Collection<Promise> promiseCollection){
-        AbstractCollectionPromise<A,B,C> collectionPromise = new AllCollectionPromise<A,B,C>(promiseCollection);
-        for(Promise promise : promiseCollection){
-            if(REJECTED == promise.getState()){
-                collectionPromise.deferred.reject("reject");
-                break;
-            }else if(PENDING == promise.getState()){
-                promiseCollection.add(promise);
+    public static <A,B,C> Promise<A,B,C> all(final Collection<Promise> promiseCollection){
+        final AbstractCollectionPromise<A,B,C> collectionPromise = new AllCollectionPromise<A,B,C>(promiseCollection);
+        getPromiseThreadHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                for(Promise promise : promiseCollection){
+                    if(REJECTED == promise.getState()){
+                        collectionPromise.deferred.reject(null);
+                        break;
+                    }else if(PENDING == promise.getState()){
+                        promiseCollection.add(promise);
+                    }
+                }
             }
-        }
+        });
+
         return collectionPromise;
     }
     /**
      *  Promise.any()
      * */
-    public static <A,B,C> Promise any(Collection<Promise> promiseCollection){
-        List<Promise> promiseList = new ArrayList<>(promiseCollection.size());
-        AbstractCollectionPromise collectionPromise = new AnyCollectionPromise(promiseList);
-        for(Promise promise : promiseList){
-            if(RESOLVED == promise.getState()){
-                collectionPromise.deferred.resolve("reject");
-                break;
-            }else if(PENDING == promise.getState()){
-                promiseList.add(promise);
+    public static <A,B,C> Promise any(final Collection<Promise> promiseCollection){
+        final AbstractCollectionPromise collectionPromise = new AnyCollectionPromise(promiseCollection);
+        getPromiseThreadHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                for(Promise promise : promiseCollection){
+                    if(RESOLVED == promise.getState()){
+                        collectionPromise.deferred.resolve("reject");
+                        break;
+                    }else if(PENDING == promise.getState()){
+                        promiseCollection.add(promise);
+                    }
+                }
             }
-        }
+        });
         return collectionPromise;
     }
     /**
@@ -166,7 +176,13 @@ public class Promise<T,E,N> {
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.onResolved(param);
+                            promiseHandler.getHandleScheduler(RESOLVED).handle(new Runnable() {
+                                @Override
+                                public void run() {
+                                    promiseHandler.onResolved(param);
+                                }
+                            });
+
                         }
                     }else {
                         throw new PromiseHasSettledException();
@@ -186,7 +202,12 @@ public class Promise<T,E,N> {
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){
-                            promiseHandler.onRejected(param);
+                            promiseHandler.getHandleScheduler(REJECTED).handle(new Runnable() {
+                                @Override
+                                public void run() {
+                                    promiseHandler.onRejected(param);
+                                }
+                            });
                         }
 
                     }else {
@@ -203,7 +224,12 @@ public class Promise<T,E,N> {
                     if(PENDING == getState()){
                         notifyValue = param;
                         if(null != promiseHandler){
-                            promiseHandler.onNotified(param);
+                            promiseHandler.getHandleScheduler(PENDING).handle(new Runnable() {
+                                @Override
+                                public void run() {
+                                    promiseHandler.onNotified(param);
+                                }
+                            });
                         }
                     }else {
                         throw new PromiseHasSettledException();

@@ -15,7 +15,7 @@ public class AllCollectionPromise<A,B,C> extends AbstractCollectionPromise<A,B,C
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
-                if(State.REJECTED == promise.getState()){
+                if(REJECTED == promise.getState()){
                     deferred.reject("reject");
                 }else{
                     promiseCollection.remove(promise);
