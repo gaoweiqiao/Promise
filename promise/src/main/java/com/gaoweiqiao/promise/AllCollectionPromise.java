@@ -15,17 +15,17 @@ public class AllCollectionPromise<A,B,C> extends AbstractCollectionPromise<A,B,C
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
-                if(REJECTED == promise.getState()){
-                    deferred.reject("reject");
-                }else{
-                    promiseCollection.remove(promise);
-                    if(0 == promiseCollection.size()){
-                        deferred.resolve("resolve");
+                if(PENDING == getState()){
+                    if(REJECTED == promise.getState()){
+                        deferred.reject(null);
+                    }else{
+                        promiseCollection.remove(promise);
+                        if(0 == promiseCollection.size()){
+                            deferred.resolve(null);
+                        }
                     }
                 }
             }
         });
-
-
     }
 }

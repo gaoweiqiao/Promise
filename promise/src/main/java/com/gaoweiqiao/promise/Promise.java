@@ -34,10 +34,6 @@ public class Promise<T,E,N> {
      * */
     private Promise next = null;
     /**
-     *  Promise 执行函数的调度器
-     * */
-    private Scheduler scheduler;
-    /**
      *  成功的回调函数
      * */
     private PromiseHandler<T,E,N,?,?,?> promiseHandler = null;
@@ -122,8 +118,8 @@ public class Promise<T,E,N> {
     /**
      * Promise.all()
      * */
-    public static <A,B,C> Promise<A,B,C> all(final Collection<Promise> promiseCollection){
-        final AbstractCollectionPromise<A,B,C> collectionPromise = new AllCollectionPromise<A,B,C>(promiseCollection);
+    public static Promise<Void,Void,Void> all(final Collection<Promise> promiseCollection){
+        final AbstractCollectionPromise<Void,Void,Void> collectionPromise = new AllCollectionPromise<Void,Void,Void>(promiseCollection);
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
@@ -131,8 +127,6 @@ public class Promise<T,E,N> {
                     if(REJECTED == promise.getState()){
                         collectionPromise.deferred.reject(null);
                         break;
-                    }else if(PENDING == promise.getState()){
-                        promiseCollection.add(promise);
                     }
                 }
             }
@@ -143,17 +137,15 @@ public class Promise<T,E,N> {
     /**
      *  Promise.any()
      * */
-    public static <A,B,C> Promise any(final Collection<Promise> promiseCollection){
+    public static Promise<Void,Void,Void> any(final Collection<Promise> promiseCollection){
         final AbstractCollectionPromise collectionPromise = new AnyCollectionPromise(promiseCollection);
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
                 for(Promise promise : promiseCollection){
                     if(RESOLVED == promise.getState()){
-                        collectionPromise.deferred.resolve("reject");
+                        collectionPromise.deferred.resolve(null);
                         break;
-                    }else if(PENDING == promise.getState()){
-                        promiseCollection.add(promise);
                     }
                 }
             }
@@ -172,7 +164,7 @@ public class Promise<T,E,N> {
                     if(PENDING == getState()){
                         state = RESOLVED;
                         Promise.this.resolvedValue = param;
-                        if(null != listener){
+                        if(null != listener ){
                             listener.listen(Promise.this);
                         }
                         if(null != promiseHandler){

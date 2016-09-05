@@ -8,8 +8,8 @@ import com.gaoweiqiao.promise.schduler.SchedulerFactory;
  */
 public abstract class PromiseHandler<T,E,N,A,B,C> {
     public abstract void onResolved(T param);
-    public abstract void onRejected(E param);
-    public abstract void onNotified(N param);
+    public void onRejected(E param){}
+    public void onNotified(N param){}
     private Promise<T,E,N> promise;
     public final void resolve(final A param){
         Promise.getPromiseThreadHandler().post(new Runnable() {
