@@ -16,6 +16,12 @@ import java.util.List;
  */
 public class Promise<T,E,N> {
     /**
+     * 状态
+     * */
+    public static final short PENDING = 0;
+    public static final short RESOLVED = 1;
+    public static final short REJECTED = 2;
+    /**
      *  promise线程
      * */
     private static HandlerThread promiseHandlerThread = null;
@@ -38,7 +44,7 @@ public class Promise<T,E,N> {
     /**
      *  Promise的状态
      */
-    private volatile State state = State.PENDING;
+    private volatile short state = PENDING;
     //保存值
     private T resolvedValue = null;
     private E rejectedValue = null;
@@ -91,7 +97,7 @@ public class Promise<T,E,N> {
             return next;
         }
     }
-    public State getState(){
+    public short getState(){
         return state;
     }
     //
@@ -119,10 +125,10 @@ public class Promise<T,E,N> {
     public static <A,B,C> Promise<A,B,C> all(Collection<Promise> promiseCollection){
         AbstractCollectionPromise<A,B,C> collectionPromise = new AllCollectionPromise<A,B,C>(promiseCollection);
         for(Promise promise : promiseCollection){
-            if(State.REJECTED == promise.getState()){
+            if(REJECTED == promise.getState()){
                 collectionPromise.deferred.reject("reject");
                 break;
-            }else if(State.PENDING == promise.getState()){
+            }else if(PENDING == promise.getState()){
                 promiseCollection.add(promise);
             }
         }
@@ -135,10 +141,10 @@ public class Promise<T,E,N> {
         List<Promise> promiseList = new ArrayList<>(promiseCollection.size());
         AbstractCollectionPromise collectionPromise = new AnyCollectionPromise(promiseList);
         for(Promise promise : promiseList){
-            if(State.RESOLVED == promise.getState()){
+            if(RESOLVED == promise.getState()){
                 collectionPromise.deferred.resolve("reject");
                 break;
-            }else if(State.PENDING == promise.getState()){
+            }else if(PENDING == promise.getState()){
                 promiseList.add(promise);
             }
         }
@@ -153,8 +159,8 @@ public class Promise<T,E,N> {
                 @Override
                 public void run() {
                     logThreadId("resolve");
-                    if(State.PENDING == getState()){
-                        state = State.RESOLVED;
+                    if(PENDING == getState()){
+                        state = RESOLVED;
                         Promise.this.resolvedValue = param;
                         if(null != listener){
                             listener.listen(Promise.this);
@@ -173,8 +179,8 @@ public class Promise<T,E,N> {
                 @Override
                 public void run() {
                     logThreadId("reject");
-                    if(State.PENDING == getState()){
-                        state = State.REJECTED;
+                    if(PENDING == getState()){
+                        state = REJECTED;
                         Promise.this.rejectedValue = param;
                         if(null != listener){
                             listener.listen(Promise.this);
@@ -194,7 +200,7 @@ public class Promise<T,E,N> {
                 @Override
                 public void run() {
                     logThreadId("notify");
-                    if(State.PENDING == getState()){
+                    if(PENDING == getState()){
                         notifyValue = param;
                         if(null != promiseHandler){
                             promiseHandler.onNotified(param);
@@ -205,15 +211,6 @@ public class Promise<T,E,N> {
                 }
             });
         }
-    }
-    /**
-     * 状态
-     * */
-    public static enum State{
-        PENDING,
-        RESOLVED,
-        REJECTED,
-        NONE
     }
     /**
      *  解决的监听器

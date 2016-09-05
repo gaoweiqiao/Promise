@@ -19,11 +19,11 @@ public abstract class PromiseHandler<T,E,N,A,B,C> {
     }
     public final void handle(Promise<T,E,N> promise){
         this.promise = promise;
-        if(Promise.State.RESOLVED == promise.getState()){
+        if(Promise.RESOLVED == promise.getState()){
             onResolved(promise.getResolvedValue());
-        }else if(Promise.State.REJECTED == promise.getState()){
+        }else if(Promise.REJECTED == promise.getState()){
             this.onRejected(promise.getRejectedValue());
-        }else if(Promise.State.PENDING == promise.getState()){
+        }else if(Promise.PENDING == promise.getState()){
             if(null != promise.getNotifyValue()){
                 this.onNotified(promise.getNotifyValue());
             }
