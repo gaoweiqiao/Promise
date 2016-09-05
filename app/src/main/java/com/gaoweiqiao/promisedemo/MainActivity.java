@@ -4,14 +4,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.gaoweiqiao.promise.Promise;
 import com.gaoweiqiao.promise.PromiseHandler;
-import com.gaoweiqiao.promise.PromiseResult;
-import com.gaoweiqiao.promise.schduler.PromiseExecuteHandler;
-import com.gaoweiqiao.promise.schduler.Scheduler;
-import com.gaoweiqiao.promise.schduler.SchedulerFactory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
