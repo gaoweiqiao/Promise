@@ -14,6 +14,11 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/sync_promise"
+        android:text="test_sync_promise"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/promise_all"
         android:text="promise all"/>
     <Button

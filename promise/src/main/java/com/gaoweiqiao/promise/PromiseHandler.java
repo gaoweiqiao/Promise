@@ -52,16 +52,33 @@ public abstract class PromiseHandler<T,E,N,A,B,C> {
         return SchedulerFactory.promise();
     }
 
-    public final void handle(Promise<T,E,N> promise){
+    public final void handle(final Promise<T,E,N> promise){
         this.promise = promise;
         if(Promise.RESOLVED == promise.getState()){
-            onResolved(promise.getResolvedValue());
+            getHandleScheduler(Promise.RESOLVED).handle(new Runnable() {
+                @Override
+                public void run() {
+                    onResolved(promise.getResolvedValue());
+                }
+            });
+
         }else if(Promise.REJECTED == promise.getState()){
-            this.onRejected(promise.getRejectedValue());
+            getHandleScheduler(Promise.REJECTED).handle(new Runnable() {
+                @Override
+                public void run() {
+                    onRejected(promise.getRejectedValue());
+                }
+            });
         }else if(Promise.PENDING == promise.getState()){
-            if(null != promise.getNotifyValue()){
-                this.onNotified(promise.getNotifyValue());
-            }
+            getHandleScheduler(Promise.PENDING).handle(new Runnable() {
+                @Override
+                public void run() {
+                    if(null != promise.getNotifyValue()){
+                        onNotified(promise.getNotifyValue());
+                    }
+                }
+            });
+
         }
     }
 }

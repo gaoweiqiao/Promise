@@ -2,14 +2,11 @@ package com.gaoweiqiao.promise;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
 import com.gaoweiqiao.promise.exception.PromiseHasSettledException;
-import com.gaoweiqiao.promise.schduler.Scheduler;
-
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by patrick on 16/8/7.
@@ -28,7 +25,8 @@ public class Promise<T,E,N> {
     /**
      *  promise线程队列
      * */
-    private static Handler promiseThreadHandler = null;
+
+    private static Handler promiseThreadHandler = new Handler(Looper.getMainLooper());
     /**
      *  下一个Promise
      * */
@@ -67,7 +65,7 @@ public class Promise<T,E,N> {
     }
 
     /**
-     *
+     *  创建一个Promise
      **/
     public static synchronized <T,E,N> Promise<T,E,N> newPromise(){
         logThreadId("newPromise");
@@ -76,11 +74,14 @@ public class Promise<T,E,N> {
     }
 
 
-    /***/
+    /**
+     * then方法，链式调用
+     * */
     public <A,B,C>Promise<A,B,C> then(final PromiseHandler<T,E,N,A,B,C> handler){
         getPromiseThreadHandler().post(new Runnable() {
             @Override
             public void run() {
+                logThreadId("handle");
                 promiseHandler = handler;
                 promiseHandler.handle(Promise.this);
             }
@@ -93,27 +94,36 @@ public class Promise<T,E,N> {
             return next;
         }
     }
+    /**
+     *  返回状态
+     * */
     public short getState(){
         return state;
     }
-    //
+    /**
+     * 获取Promise的操作线程队列
+     * */
     public static Handler getPromiseThreadHandler(){
-        if(null == promiseHandlerThread){
-            synchronized (Promise.class){
-                if(null == promiseHandlerThread){
-                    promiseHandlerThread = new HandlerThread("com.gaoweiqiao.promise");
-                    promiseHandlerThread.start();
-                    promiseThreadHandler = new Handler(promiseHandlerThread.getLooper());
-                }
-            }
-        }
+//        if(null == promiseHandlerThread){
+//            synchronized (Promise.class){
+//                if(null == promiseHandlerThread){
+//                    promiseHandlerThread = new HandlerThread("com.gaoweiqiao.promise");
+//                    promiseHandlerThread.start();
+//                    promiseThreadHandler = new Handler(promiseHandlerThread.getLooper());
+//                }
+//            }
+//        }
         return promiseThreadHandler;
     }
-    //
-    private static void logThreadId(String methodName){
+    /**
+     *  打印队列Id
+     * */
+    public static void logThreadId(String methodName){
         Log.d("promise @",methodName + Thread.currentThread().getId());
     }
-    //
+    /**
+     *  当状态从PENDING变为RESOLVED或者REJECTED时调用监听
+     * */
     protected SettledListener listener;
     /**
      * Promise.all()
@@ -153,9 +163,12 @@ public class Promise<T,E,N> {
         return collectionPromise;
     }
     /**
-     *  延迟
+     *  延迟对象，用于当操作完成时发送通知
      * */
     public class Deferred{
+        /**
+         *  解决
+         * */
         public void resolve(final T param){
             getPromiseThreadHandler().post(new Runnable() {
                 @Override
@@ -182,6 +195,9 @@ public class Promise<T,E,N> {
                 }
             });
         }
+        /**
+         *  失败
+         * */
         public void reject(final E param){
             getPromiseThreadHandler().post(new Runnable() {
                 @Override
@@ -208,6 +224,9 @@ public class Promise<T,E,N> {
                 }
             });
         }
+        /**
+         *  通知
+         * */
         public void notify(final N param){
             getPromiseThreadHandler().post(new Runnable() {
                 @Override
