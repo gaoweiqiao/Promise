@@ -5,25 +5,55 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.gaoweiqiao.promisedemo.MainActivity">
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scroll_view">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:id="@+id/progress_layout"
+                android:layout_height="10dp">
+                <View android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/progress"
+                    android:background="#ff0000">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/promise"
-        android:text="Hello promise!" />
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/sync_promise"
-        android:text="test_sync_promise"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/promise_all"
-        android:text="promise all"/>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/promise_any"
-        android:text="promise_any"/>
+                </View>
+            </RelativeLayout>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/promise"
+                android:text="Hello promise!" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/sync_promise"
+                android:text="test_sync_promise"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/promise_all"
+                android:text="promise all"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/promise_any"
+                android:text="promise_any"/>
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ff0000"
+                android:id="@+id/listview">
+
+            </android.support.v7.widget.RecyclerView>
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+
 </LinearLayout>
