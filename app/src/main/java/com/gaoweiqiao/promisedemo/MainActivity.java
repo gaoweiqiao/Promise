@@ -62,13 +62,33 @@ public class MainActivity extends AppCompatActivity {
                 animator.start();
             }
         },1000);
+
+        scrollView.setSmoothScrollingEnabled(true);
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.scrollTo(0,0);
+            }
+        });
         ViewGroup.LayoutParams layoutParams = listView.getLayoutParams();
         layoutParams.height = getResources().getDisplayMetrics().heightPixels;
         listView.setLayoutParams(layoutParams);
+
         listView.setAdapter(new DataAdapter());
-        listView.setLayoutManager(new LinearLayoutManager(this));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setSmoothScrollbarEnabled(true);
+        layoutManager.setAutoMeasureEnabled(true);
+        listView.setLayoutManager(layoutManager);
+        listView.setHasFixedSize(true);
         listView.setNestedScrollingEnabled(true);
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        scrollView.scrollBy(0,0);
+    }
+
     @OnClick(R.id.promise)
     protected void test_promise(){
        getResolvedPromise("gao")
@@ -232,6 +252,8 @@ public class MainActivity extends AppCompatActivity {
     }
     @OnClick(R.id.promise_any)
     protected void test_promise_any(){
+
+
         List<Promise> promiseList = new ArrayList<>();
         promiseList.add(getRejectedPromise("gao"));
         promiseList.add(getRejectedPromise("gao"));
