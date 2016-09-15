@@ -1,5 +1,6 @@
 package com.gaoweiqiao.promisedemo;
 
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.Handler;
 import android.support.v4.widget.NestedScrollView;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -63,6 +65,14 @@ public class MainActivity extends AppCompatActivity {
             }
         },1000);
 
+        final ViewTreeObserver observer = promiseButton.getViewTreeObserver();
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                Log.d("gao","width is "+promiseButton.getWidth()+"px and height is "+promiseButton.getHeight()+"px");
+                return true;
+            }
+        });
         scrollView.setSmoothScrollingEnabled(true);
         scrollView.post(new Runnable() {
             @Override
